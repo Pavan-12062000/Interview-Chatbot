@@ -10,8 +10,8 @@ class getDbConnection {
         pool = new Pool({
           user: 'postgres',
           host: 'localhost', // usually 'localhost' if your database is hosted locally
-          database: 'Chatbot',
-          password: 'Sahithi@2002',
+          database: 'keep your database name',
+          password: 'keep your password',
           port: '5432', // usually 5432 for PostgreSQL
         });
 
