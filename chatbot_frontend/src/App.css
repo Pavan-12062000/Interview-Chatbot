@@ -32,7 +32,83 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Login Page */
+.custom-input {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+}
+
+.password-button-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ced4da;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  padding-right: 10px;
+  background-color: white;
+}
+
+.password-toggle-button {
+  border: none;
+  background: none;
+  padding: 0.375rem 0.75rem;
+  color: #6c757d;
+}
+
+.password-toggle-button:hover {
+  color: #4070f4;
+}
+
+/* Global */
+.form-control {
+  border-color: #ced4da !important;
+}
+
+.form-control:focus {
+  border-color: #4070f4 !important;
+  box-shadow: 0 0 0 0.2rem rgba(64, 112, 244, 0.25) !important;
+}
+
+.btn-primary {
+  background-color: #4070f4 !important;
+  border-color: #4070f4 !important;
+}
+
+.btn-primary:hover {
+  background-color: #3060e0 !important;
+  border-color: #3060e0 !important;
+}
+
+.login-title {
+  font-size: 2.3rem;
+  font-weight: normal;
+}
+
+.login-subtitle {
+  font-size: 1.2rem;
+  color: #6c757d;
+}
+
+.login-label {
+  font-size: 1.1rem;
+}
+
+.login-text {
+  font-size: 1rem;
+}
+
+.login-link {
+  color: #4070f4;
+  text-decoration: none;
+}
+
+.login-link:hover {
+  color: #3060e0;
 }
