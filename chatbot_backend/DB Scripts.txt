@@ -1,0 +1,8 @@
+create table register (id serial primary key,
+					  firstname character varying not null,
+					  lastname character varying not null,
+					  email character varying not null,
+					  password character varying not null,
+					  timestamp timestamp without time zone,
+					  updated_timestamp timestamp without time zone,
+					  CONSTRAINT unique_user UNIQUE (firstname, lastname, email));
