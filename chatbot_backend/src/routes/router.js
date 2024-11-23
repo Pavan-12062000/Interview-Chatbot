@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const ChatbotService = require('../services/chatbot_service');
-const logError = require('../utilities/errorlogger');
+const logError = require('../utilities/errorLogger');
 
 const chatbotService = new ChatbotService();
 
