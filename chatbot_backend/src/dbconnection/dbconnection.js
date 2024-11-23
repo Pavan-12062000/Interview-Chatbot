@@ -1,4 +1,4 @@
-const logError = require('../utilities/errorlogger');
+const logError = require('../utilities/errorLogger');
 const { Pool } = require('pg');
 
 let pool = null;
@@ -8,10 +8,10 @@ class getDbConnection {
     try {
       if (pool === null) {
         pool = new Pool({
-          user: 'alfred',
+          user: 'postgres',
           host: 'localhost', // usually 'localhost' if your database is hosted locally
-          database: 'postgres',
-          password: '1234',
+          database: 'Keep your database name',
+          password: 'keep your database password',
           port: '5432', // usually 5432 for PostgreSQL
         });
 

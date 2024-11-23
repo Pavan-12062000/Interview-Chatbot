@@ -101,6 +101,7 @@ const LogIn = () => {
 
         try {
             const response = await login(formData.email, formData.password);
+            console.log("response", response)
 
             if (response.success) {
                 const userInfo = {
