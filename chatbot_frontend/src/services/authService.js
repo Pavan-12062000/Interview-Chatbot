@@ -80,14 +80,14 @@ api.interceptors.response.use(
 export const register = async (firstname, lastname, email, password) => {
     try {
         const response = await api.post('/register', {
-
-            firstname,
-            lastname,
-            email,
-            password
+            params: {
+                firstname,
+                lastname,
+                email,
+                password
+            }
 
         });
-
         console.log('Registration response:', response);
 
         if (response.data) {

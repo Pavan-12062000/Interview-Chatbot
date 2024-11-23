@@ -20,8 +20,16 @@ router.post('/login', async (req,res) => {
         res.send(response);
     }catch(err){
         logError(err);
+    } 
+})
+
+router.post('/chat', async (req,res) => {
+    try{
+        const response = await chatbotService.chat(req);
+        res.send(response);
+    }catch(err){
+        logError(err);
     }
-    
 })
 
 module.exports = router;
