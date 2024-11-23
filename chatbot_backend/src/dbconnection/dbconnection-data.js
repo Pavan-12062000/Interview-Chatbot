@@ -6,10 +6,9 @@ const logError = require('../utilities/errorLogger');
 const axios = require('axios');
 
 require('dotenv').config(); // Load environment variables from .env file
-console.log("Loaded OpenAI API Key:", process.env.OPENAI_API_KEY); // This should print the correct API key
 
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const NEBIUS_API_KEY = process.env.NEBIUS_API_KEY;
 
 class DbConnection{
     async register(firstname, lastname, email, password){
@@ -37,7 +36,6 @@ class DbConnection{
             let query = queryConstantsInstance.login;
             let params =[email, password];
             const response = await client.query(query, params);
-            console.log("response", response.rows);
             return response.rows;
         }catch (error) {
             logError(error);
@@ -51,11 +49,10 @@ class DbConnection{
 
     async getAIResponse(prompt) {
         try {
-            console.log("Using API Key:", process.env.OPENAI_API_KEY); // Debug: Log the API key
             const response = await axios.post(
-                "https://api.openai.com/v1/chat/completions",
+                "https://api.studio.nebius.ai/v1/chat/completions",
                 {
-                    model: "gpt-3.5-turbo", 
+                    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast", 
                     messages: [{ role: "user", content: prompt }],
                     max_tokens: 8192,
                     temperature: 0.7,
@@ -63,7 +60,7 @@ class DbConnection{
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+                        Authorization: `Bearer ${NEBIUS_API_KEY}`,
                     },
                 }
             );
@@ -78,13 +75,9 @@ class DbConnection{
     async chat(message, flag){
         try{
             let aiResponse;
-            console.log("In chat function", message, flag);
-            // if(flag){
-            //     message = "Act as an interviewer. Ask questions to the candidate based on the job description provided and the candidate resume.";
-            //     aiResponse = await getAIResponse(message);
-            // }else{
-            //     aiResponse = await getAIResponse(message);
-            // }
+            if(flag == true){
+                message = "Act as an interviewer. Ask questions to the candidate based on the job description provided and the candidate resume.";
+            }
             aiResponse = await this.getAIResponse(message);
             return aiResponse;
         }catch (error) {
