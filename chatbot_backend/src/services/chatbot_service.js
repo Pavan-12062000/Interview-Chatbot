@@ -1,12 +1,10 @@
 const DbConnection = require('../dbconnection/dbconnection-data');
 const logError = require('../utilities/errorLogger');
-const dbConnectionInstance = new DbConnection();  
+const dbConnectionInstance = new DbConnection();
  
 class ChatbotService {
     async register(req) {
-        console.log("Inside register service", req.body);
         const params =  req.body.params;
-        console.log("params", params);
         let response;
             const firstname = params.firstname;
             const lastname = params.lastname;
@@ -33,14 +31,27 @@ class ChatbotService {
         }
     }
  
+    async prechat(req, resume){
+        const params =  req.body;
+        let response;
+        const flag = params.flag;
+        const session_id = params.session_id;
+        const jd = params.jobDescription;
+        try{
+            response = await dbConnectionInstance.prechat(flag, session_id, jd, resume);
+            return response;
+        }catch(err){
+            logError(err);
+        }
+    }
+
     async chat(req){
         const params =  req.body.params;
         let response;
-        const message = params.message;
-        const flag = params.flag;
         const session_id = params.session_id;
+        const message = params.message;
         try{
-            response = await dbConnectionInstance.chat(message, flag, session_id);
+            response = await dbConnectionInstance.chat(session_id, message);
             return response;
         }catch(err){
             logError(err);
@@ -95,6 +106,16 @@ class ChatbotService {
             logError(err);
         }
     }
+
+    async processResume(filePath) {
+        try{
+            let text = await dbConnectionInstance.processResume(filePath);
+            return text;
+        }catch(err){
+            logError(err);
+        }
+
+    }    
 }
  
 module.exports = ChatbotService;
