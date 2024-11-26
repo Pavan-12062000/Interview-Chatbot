@@ -1,9 +1,11 @@
-const { query } = require('express');
 const getDbConnection = require('../dbconnection/dbconnection')
 let getDbConnectionInstance = new getDbConnection();
 const queryConstantsInstance = require('../queryconstants/queryconstants');
 const logError = require('../utilities/errorLogger');
-const axios = require('axios');
+const axios = require('axios'); 
+const fs = require('fs');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
  
 require('dotenv').config(); // Load environment variables from .env file
  
@@ -89,17 +91,31 @@ class DbConnection{
         }
     }
  
-    async chat(message, flag, session_id){
+    async prechat(flag, session_id, job_description, resume){
         try{
             let aiResponse;
-            if(flag == true){
-                message = "Act as an interviewer. Ask questions to the candidate based on the job description provided and the candidate resume. And the candidate resume will be shared with you in a JSON format. Start with the basic questons and slowly increase the level of difficulty.";
+            if(flag == 'true'){
+                message = `Act as a professional interviewer. Using the provided job description: '${job_description}' and the candidate's resume: '${resume}', conduct a structured and conversational interview. Begin by asking one question at a time. Wait for the candidate to respond before asking the next question. Use the candidate's responses to dynamically tailor the follow-up questions, starting with foundational topics and gradually increasing complexity. Conclude the interview after 10 minutes, and provide constructive feedback on the candidate's strengths and areas for improvement. Avoid giving all questions at once; maintain a natural and conversational flow.`;
             }
             aiResponse = await this.getAIResponse(message);
             // Save the user and AI responses to chat history
-            await this.saveChatHistory(session_id, "user", message);
             await this.saveChatHistory(session_id, "Ai", aiResponse);
            
+            return aiResponse;
+        }catch (error) {
+            console.error("Chatbot service error:", error.message);
+            return "Sorry, I am unable to process your request.";
+        }
+    }
+
+    async chat(session_id, message){
+        try{
+            let aiResponse;
+            // Save the user message to chat history
+            await this.saveChatHistory(session_id, "user", message);
+            aiResponse = await this.getAIResponse(message);
+            // Save the AI response to chat history
+            await this.saveChatHistory(session_id, "Ai", aiResponse);
             return aiResponse;
         }catch (error) {
             console.error("Chatbot service error:", error.message);
@@ -176,6 +192,32 @@ class DbConnection{
             if(client){
                 await client.end();
             }
+        }
+    }
+
+    async processResume(filePath) {
+        try {
+            if (!fs.existsSync(filePath)) {
+                throw new Error('File not found: ' + filePath);
+            }
+    
+            const fileBuffer = fs.readFileSync(filePath);
+            let text;
+    
+            if (filePath.endsWith('.pdf')) {
+                const data = await pdfParse(fileBuffer);
+                text = data.text;
+            } else if (filePath.endsWith('.docx')) {
+                const { value } = await mammoth.extractRawText({ buffer: fileBuffer });
+                text = value || "Empty document or unsupported format.";
+            } else {
+                throw new Error('Unsupported file format');
+            }
+            fs.unlinkSync(filePath); // Optional: Clean up the uploaded file
+    
+            return text.trim();
+        } catch (err) {
+            throw new Error('Failed to process resume: ' + err.message);
         }
     }
 }
