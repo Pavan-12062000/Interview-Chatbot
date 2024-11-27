@@ -50,15 +50,6 @@ router.post('/login', async (req,res) => {
     }
 })
  
-// router.post('/chat', async (req,res) => {
-//     try{
-//         const response = await chatbotService.chat(req);
-//         res.send(response);
-//     }catch(err){
-//         logError(err);
-//     }
-// })
- 
 router.get('/home', async (req, res) => {
     try{
         const response = await chatbotService.home(req);
@@ -127,5 +118,14 @@ router.post('/chat', upload.single('resume'), async (req, res) => {
         logError(err);
     }
 });
+
+router.post('/rename', async (req, res) => {
+    try{
+        const response = await chatbotService.renameSession(req);
+        res.send(response);
+    }catch(err){
+        logError(err);
+    }
+})
 
 module.exports = router;

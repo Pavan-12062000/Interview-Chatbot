@@ -115,7 +115,20 @@ class ChatbotService {
             logError(err);
         }
 
-    }    
+    }
+    
+    async renameSession(req){
+        const params =  req.body.params;
+        let response;
+        const session_id = params.session_id;
+        const session_name = params.session_name;
+        try{
+            response = await dbConnectionInstance.renameSession(session_id, session_name);
+            return response;
+        }catch(err){
+            logError(err);
+        }
+    }
 }
  
 module.exports = ChatbotService;

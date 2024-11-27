@@ -97,8 +97,10 @@ class DbConnection {
             if (flag == 'true') {
                 message = `Act as a professional interviewer. Using the provided job description: '${job_description}' and the candidate's resume: '${resume}', conduct a structured and conversational interview. Begin by asking one question at a time. Wait for the candidate to respond before asking the next question. Use the candidate's responses to dynamically tailor the follow-up questions, starting with foundational topics and gradually increasing complexity. Conclude the interview after 10 minutes, and provide constructive feedback on the candidate's strengths and areas for improvement. Avoid giving all questions at once; maintain a natural and conversational flow.`;
             }
+            console.log('Prechat message:', message);
             aiResponse = await this.getAIResponse(message);
             // Save the user and AI responses to chat history
+            console.log('Prechat AI response:', aiResponse);
             await this.saveChatHistory(session_id, "Ai", aiResponse);
 
             return aiResponse;
@@ -112,8 +114,10 @@ class DbConnection {
         try {
             let aiResponse;
             // Save the user message to chat history
+            console.log('Chat message:', message);
             await this.saveChatHistory(session_id, "user", message);
             aiResponse = await this.getAIResponse(message);
+            console.log('Chat AI response:', aiResponse);
             // Save the AI response to chat history
             await this.saveChatHistory(session_id, "Ai", aiResponse);
             return aiResponse;
@@ -178,9 +182,11 @@ class DbConnection {
     async createChatSession(user_id, session_name) {
         let client;
         try {
+            console.log('Creating chat session for user:', user_id, 'with name:', session_name);
             client = await getDbConnectionInstance.getConnection();
             let query = queryConstantsInstance.createChatSession;
             let params = [user_id, session_name];
+            console.log('Before executing query:', query, params);
             const response = await client.query(query, params);
             return response.rows[0]; // Return the created session
         } catch (error) {
@@ -234,6 +240,24 @@ class DbConnection {
             return text.trim();
         } catch (err) {
             throw new Error('Failed to process resume: ' + err.message);
+        }
+    }
+
+    async renameSession(session_id, session_name) {
+        let client;
+        try {
+            client = await getDbConnectionInstance.getConnection();
+            let query = queryConstantsInstance.renameSession;
+            let params = [session_name, session_id];
+            const response = await client.query(query, params);
+            return response.rows[0]; // Return the renamed session
+        } catch (error) {
+            logError(error);
+            throw error;
+        } finally {
+            if (client) {
+                await client.end();
+            }
         }
     }
 }

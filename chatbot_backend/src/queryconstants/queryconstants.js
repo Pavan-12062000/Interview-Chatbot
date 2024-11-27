@@ -8,11 +8,13 @@ class queryConstants{
  
     getChatHistory = `SELECT sender, message, timestamp FROM chat_history WHERE chat_session_id = $1 ORDER BY timestamp ASC;`;
  
-    createChatSession = `INSERT INTO chat_sessions (user_id, session_name) VALUES ($1, $2) RETURNING session_id, created_at`;
+    createChatSession = `INSERT INTO chat_sessions (user_id, session_name, created_at) VALUES ($1, $2, now()) RETURNING session_id, created_at`;
  
     saveChatHistory = `INSERT INTO chat_history (chat_session_id, sender, message) VALUES ($1, $2, $3)`;
  
     deleteChatSession = `DELETE FROM chat_sessions WHERE session_id = $1`;
+
+    renameSession = `UPDATE chat_sessions SET session_name = $1, updated_at = now()  WHERE session_id = $2`;
  
 }
  
