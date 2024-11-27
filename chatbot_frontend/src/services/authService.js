@@ -118,6 +118,8 @@ export const login = async (email, password) => {
                 localStorage.setItem('token', response.data.token);
             }
 
+            localStorage.setItem('user_info', JSON.stringify(response.data[0]));
+
             return {
                 success: true,
                 data: response.data
@@ -126,5 +128,139 @@ export const login = async (email, password) => {
     } catch (error) {
         console.error('Login error:', error.response || error);
         throw new Error(error.response?.data?.message || 'Login failed');
+    }
+};
+
+export const getChatHistory = async (userId) => {
+    try {
+        const response = await api.get('/home', {
+            headers: {
+                params: JSON.stringify({ user_id: userId })
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Get chat history error:', error.response || error);
+        throw new Error(error.response?.data?.message || 'Failed to get chat history');
+    }
+};
+
+export const getChatMessages = async (sessionId) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+        console.log('Fetching messages for session:', sessionId);
+        const response = await api.get('/chatHistory', {
+            headers: {
+                params: JSON.stringify({ session_id: sessionId })
+            },
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.data) {
+            return [];
+        }
+
+        const messages = Array.isArray(response.data) ? response.data : [];
+        console.log('Fetched messages count:', messages.length);
+        return messages;
+
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            throw new Error('Request timeout');
+        }
+        throw error;
+    }
+};
+
+export const createChatSession = async (userId, sessionName) => {
+    try {
+        const response = await api.post('/createChatSession', {
+            params: {
+                user_id: userId,
+                session_name: sessionName
+            }
+        });
+        //console.log('session response:', response.data)
+        return response.data;
+    } catch (error) {
+        console.error('Create chat session error:', error.response || error);
+        throw new Error(error.response?.data?.message || 'Failed to create chat session');
+    }
+};
+
+export const sendMessage = async (sessionId, message) => {
+    try {
+        const response = await api.post('/chat', {
+            params: {
+                session_id: sessionId,
+                message: message
+            }
+        });
+        console.log('Chat response data:', response.data)
+        return response.data;
+    } catch (error) {
+        console.error('Send message error:', error.response || error);
+        throw new Error(error.response?.data?.message || 'Failed to send message');
+    }
+};
+
+export const deleteChatSession = async (sessionId) => {
+    try {
+        const response = await api.delete('/deleteChatSession', {
+            data: {
+                params: {
+                    session_id: sessionId
+                }
+            }
+        });
+        console.log('Delete session response:', response.data)
+        return response?.data;
+    } catch (error) {
+        console.error('Delete chat session error:', error.response || error);
+        throw new Error(error.response?.data?.message || 'Failed to delete chat session');
+    }
+};
+
+export const startInterviewChat = async (sessionId, jobDescription, resumeFile) => {
+    try {
+        const formData = new FormData();
+        formData.append('flag', 'true');
+        formData.append('session_id', sessionId);
+        formData.append('jobDescription', jobDescription);
+        formData.append('resume', resumeFile);
+
+        const response = await api.post('/chat', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Start interview chat error:', error.response || error);
+        throw new Error(error.response?.data?.message || 'Failed to start interview chat');
+    }
+};
+
+export const uploadFile = async (sessionId, file) => {
+    try {
+        const formData = new FormData();
+        formData.append('resume', file);
+        formData.append('session_id', sessionId);
+        formData.append('flag', 'true');
+
+        const response = await api.post('/chat', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('File upload error:', error.response || error);
+        throw new Error(error.response?.data?.message || 'Failed to upload file');
     }
 };
