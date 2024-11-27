@@ -112,3 +112,135 @@
 .login-link:hover {
   color: #3060e0;
 }
+
+/* MainPage CSS */
+.transition-all {
+  transition: all 0.3s ease-in-out;
+}
+
+.sidebar {
+  background-color: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar-content {
+  width: 250px;
+}
+
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 180px);
+  text-align: center;
+  color: #6c757d;
+  padding: 2rem;
+}
+
+.welcome-container h2 {
+  margin-bottom: 1rem;
+  color: #212529;
+}
+
+.chat-header {
+  height: 48px;
+  padding: 0 0.5rem;
+  background-color: white;
+}
+
+.message-bubble {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.ai-message {
+  background-color: #f8f9fa;
+}
+
+.user-message {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.input-area {
+  background-color: white;
+  border-top: 1px solid #dee2e6;
+  padding: 1rem;
+  position: sticky;
+  bottom: 0;
+}
+
+.input-group-container {
+  max-width: 768px;
+  margin: 0 auto;
+}
+
+.input-group {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.input-group .form-control {
+  border: none;
+  padding: 0.75rem;
+}
+
+.input-group .form-control:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.btn-ghost {
+  color: #6c757d;
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+}
+
+.btn-ghost:hover {
+  color: #343a40;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.chat-history-item {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.chat-history-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.chat-history-item.active {
+  background-color: #e9ecef;
+  font-weight: 500;
+}
+
+.chat-history-item.active:hover {
+  background-color: #e9ecef;
+}
+
+/* 下拉菜单样式 */
+.dropdown-menu {
+  min-width: 120px;
+  padding: 0.5rem 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}

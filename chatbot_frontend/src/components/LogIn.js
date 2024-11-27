@@ -106,6 +106,7 @@ const LogIn = () => {
             if (response.success) {
                 const userInfo = {
                     email: formData.email,
+                    id: response.data[0].id
                     // Add other user info that should be remembered
                 };
 
@@ -114,7 +115,7 @@ const LogIn = () => {
                 saveToken(response.data.token, rememberMe);
 
                 // TODO: Redirecting after login
-                navigate('/');
+                navigate('/mainpage');
                 console.log("Login Successfully!")
             }
         } catch (error) {
