@@ -238,6 +238,7 @@ export const startInterviewChat = async (sessionId, jobDescription, resumeFile) 
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            transformRequest: [(data) => data],
         });
         return response.data;
     } catch (error) {
@@ -262,5 +263,20 @@ export const uploadFile = async (sessionId, file) => {
     } catch (error) {
         console.error('File upload error:', error.response || error);
         throw new Error(error.response?.data?.message || 'Failed to upload file');
+    }
+};
+
+export const renameSession = async (sessionId, newName) => {
+    try {
+        const response = await api.post('/rename', {
+            params: {
+                session_id: sessionId,
+                session_name: newName
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Rename session error:', error.response || error);
+        throw new Error(error.response?.data?.message || 'Failed to rename session');
     }
 };

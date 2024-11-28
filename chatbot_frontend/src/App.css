@@ -229,7 +229,6 @@
   background-color: #e9ecef;
 }
 
-/* 下拉菜单样式 */
 .dropdown-menu {
   min-width: 120px;
   padding: 0.5rem 0;
@@ -243,4 +242,31 @@
 
 .dropdown-item:hover {
   background-color: #f8f9fa;
+}
+
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+}
+
+.welcome-form {
+  max-width: 600px;
+  width: 100%;
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.welcome-form .form-control {
+  background-color: white;
+  border: 1px solid #dee2e6;
+}
+
+.welcome-form .btn {
+  width: 100%;
+  margin-top: 1rem;
 }
