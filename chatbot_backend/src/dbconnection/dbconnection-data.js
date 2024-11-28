@@ -49,29 +49,50 @@ class DbConnection {
         }
     }
 
-    async getAIResponse(prompt) {
-        try {
-            const response = await axios.post(
-                "https://api.studio.nebius.ai/v1/chat/completions",
-                {
-                    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
-                    messages: [{ role: "user", content: prompt }],
-                    max_tokens: 8192,
-                    temperature: 0.7,
-                },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${NEBIUS_API_KEY}`,
-                    },
-                }
-            );
-            return response.data.choices[0].message.content.trim();
-        } catch (error) {
-            console.error("Error interacting with OpenAI:", error.response?.data || error.message);
-            throw new Error("OpenAI API error");
-        }
-    }
+   async getAIResponse(prompt, previousMessages = []) {
+  try {
+    const messages = [
+      {
+        role: "system",
+        content: `You are a professional job interviewer specializing in conducting structured and conversational interviews.
+        Use the provided job description and candidate's resume to tailor your questions.
+        Ask one question at a time and wait for the candidate's response before proceeding.
+        Use the candidate's answers to inform your next question.
+        Maintain a friendly and professional tone throughout the interview.
+        Conclude the interview after approximately 10 minutes and provide constructive feedback on the candidate's strengths and areas for improvement.`
+      },
+      {
+        role: "user",
+        content: `Job Description: ${job_description}\n\nCandidate's Resume: ${resume}`
+      },
+      ...previousMessages, // Include prior conversation turns
+      {
+        role: "user",
+        content: prompt // The candidate's latest response
+      }
+    ];
+
+    const response = await axios.post(
+      "https://api.studio.nebius.ai/v1/chat/completions",
+      {
+        model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
+        messages: messages,
+        max_tokens: 1024, // Adjust as needed while considering token limits
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${NEBIUS_API_KEY}`,
+        },
+      }
+    );
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error("Error interacting with Nebius AI:", error.response?.data || error.message);
+    throw new Error("Nebius AI API error");
+  }
+}
 
     async saveChatHistory(sessionId, sender, message) {
         let client;
