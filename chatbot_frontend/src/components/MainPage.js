@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, LogOut, Mic, FileUp, MoreVertical } from 'lucide-react';
-import { getChatHistory, getChatMessages, createChatSession, sendMessage, deleteChatSession, uploadFile } from '../services/authService';
+import { getChatHistory, getChatMessages, createChatSession, sendMessage, deleteChatSession, uploadFile, startInterviewChat, renameSession } from '../services/authService';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
 
@@ -15,6 +15,11 @@ const MainPage = () => {
     const [error, setError] = useState(null);
     const [messages, setMessages] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
+    const [jobDescription, setJobDescription] = useState('');
+    const [resumeFile, setResumeFile] = useState(null);
+    const [editSessionId, setEditSessionId] = useState(null);
+    const [sessionName, setSessionName] = useState('');
+
 
     // Load chat history on component mount
     useEffect(() => {
@@ -65,11 +70,18 @@ const MainPage = () => {
             try {
                 setLoading(true);
                 if (!chatStarted) {
+                    const sessionCount = chatHistory.length + 1;
                     const userInfo = JSON.parse(sessionStorage.getItem('user_info'));
-                    console.log('User info:', userInfo)
-                    const newSession = await createChatSession(userInfo.id, "New Chat Session");
+                    //console.log('User info:', userInfo)
+                    setSessionName(`Chat Session ${sessionCount}`)
+                    //const newSessionName = `Chat session ${sessionCount}`
+                    const newSession = await createChatSession(userInfo.id, sessionName);
+                    setChatHistory(prevChatHistory => [
+                        {
+                            user_id: userInfo.id,
+                            session_name: sessionName
+                        }, ...prevChatHistory]);
                     setActiveChat(newSession.session_id);
-                    setChatHistory([newSession, ...chatHistory]);
                     setChatStarted(true);
                 }
 
@@ -116,9 +128,16 @@ const MainPage = () => {
             await new Promise(resolve => setTimeout(resolve, 100));
 
             setActiveChat(chatId);
-            setChatStarted(true);
+
             const messages = await getChatMessages(chatId);
-            setMessages(messages || []);
+            if (!messages || messages.length === 0) {
+                setChatStarted(false);
+                setJobDescription('');
+                setResumeFile(null);
+            } else {
+                setChatStarted(true);
+                setMessages(messages);
+            }
         } catch (err) {
             console.error('Error loading chat messages:', err);
             setError('Failed to load chat messages');
@@ -130,15 +149,35 @@ const MainPage = () => {
     // Handle creating new chat
     const handleNewChat = async () => {
         try {
+            setLoading(true)
             const userId = JSON.parse(localStorage.getItem('user_info'))?.id;
             if (!userId) {
                 throw new Error('User not found');
             }
-            const newSession = await createChatSession(userId, "New Chat Session");
+            const sessionCount = chatHistory.length + 1;
+            const newSessionName = `Chat session ${sessionCount}`
+            const newSession = await createChatSession(userId, newSessionName);
+            const sessionWithName = {
+                session_id: newSession.session_id,
+                user_id: userId,
+                session_name: newSessionName,
+                ...newSession
+            };
+
+            await new Promise(resolve => {
+                setChatHistory(prevChatHistory => {
+                    const updatedHistory = [sessionWithName, ...prevChatHistory];
+                    resolve(updatedHistory);
+                    return updatedHistory;
+                });
+            });
+
             setActiveChat(newSession.session_id);
-            setChatHistory(prev => [newSession, ...prev]);
-            setChatStarted(true);
             setMessages([]);
+
+            setJobDescription('');
+            setResumeFile(null);
+            setChatStarted(false);
         } catch (err) {
             console.error('Error creating new chat:', err);
             setError('Failed to create new chat');
@@ -167,9 +206,16 @@ const MainPage = () => {
         const file = e.target.files[0];
         if (!file) return;
 
+        const userMessage = {
+            id: Date.now(),
+            sender: 'user',
+            message: message
+        };
+        setMessages(prevMessages => [...prevMessages, userMessage]);
+
         try {
             setIsUploading(true);
-            const response = await uploadFile(activeChat, file);
+            const response = await startInterviewChat(activeChat, userMessage, file);
             await loadChatMessages(activeChat);
         } catch (err) {
             console.error('Error uploading file:', err);
@@ -218,6 +264,100 @@ const MainPage = () => {
         window.location.href = '/login';
     };
 
+    const handleStartInterview = async () => {
+        try {
+            console.log('Starting interview with:', {
+                jobDescription,
+                resumeFile: resumeFile ? resumeFile.name : null
+            });
+            setLoading(true);
+            let currentSessionId = activeChat;
+            let sessionCreated = false;
+
+            if (!activeChat) {
+                const userInfo = JSON.parse(localStorage.getItem('user_info'));
+                const sessionCount = chatHistory.length + 1;
+                const newSessionName = `Chat Session ${sessionCount}`
+                //console.log('Creating new session with name:', sessionName);
+                const newSession = await createChatSession(userInfo.id, newSessionName)
+                //console.log('New session response:', newSession);
+                const sessionWithName = {
+                    session_id: newSession.session_id,
+                    user_id: userInfo.id,
+                    session_name: newSessionName,
+                    ...newSession
+                };
+                await new Promise(resolve => {
+                    setChatHistory(prevChatHistory => {
+                        const updatedHistory = [sessionWithName, ...prevChatHistory];
+                        resolve(updatedHistory);
+                        return updatedHistory;
+                    });
+                });
+                currentSessionId = newSession.session_id;
+                setActiveChat(currentSessionId);
+                sessionCreated = true;
+            }
+
+            const response = await startInterviewChat(
+                currentSessionId,
+                jobDescription,
+                resumeFile
+            );
+
+            if (response) {
+                setChatStarted(true);
+
+                setMessages(prevMessages => [...prevMessages, {
+                    id: Date.now(),
+                    sender: 'user',
+                    message: `Job Description:\n${jobDescription}`
+                }]);
+
+                setJobDescription('');
+                setResumeFile(null);
+
+                setMessages(prevMessages => [...prevMessages, {
+                    id: Date.now(),
+                    sender: 'ai',
+                    message: response
+                }])
+
+                if (sessionCreated) {
+                    const userId = JSON.parse(localStorage.getItem('user_info'))?.id;
+                    const history = await getChatHistory(userId);
+                    setChatHistory(history);
+                }
+            }
+
+        } catch (err) {
+            console.error('Error starting interview:', err);
+            setError('Failed to start interview.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRename = async (sessionId, newName) => {
+        try {
+            await renameSession(sessionId, newName);
+
+            setChatHistory(prevHistory =>
+                prevHistory.map(chat =>
+                    chat.session_id === sessionId
+                        ? { ...chat, session_name: newName }
+                        : chat
+                )
+            );
+
+            setEditSessionId(null);
+            setSessionName('');
+        } catch (err) {
+            console.error('Error renaming session:', err);
+            setError('Failed to rename session');
+        }
+    };
+
     return (
         <div className="container-fluid vh-100 p-0">
             <div className="row h-100 g-0">
@@ -248,7 +388,23 @@ const MainPage = () => {
                                     className={`chat-history-item d-flex justify-content-between align-items-center ${activeChat === chat.session_id ? 'active' : ''}`}
                                     onClick={() => handleChatSelect(chat.session_id)}
                                 >
-                                    <span>{chat.session_name}</span>
+                                    {editSessionId === chat.session_id ? (
+                                        <input
+                                            type="text"
+                                            className="form-control form-control-sm"
+                                            value={sessionName}
+                                            onChange={(e) => setSessionName(e.target.value)}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    handleRename(chat.session_id, sessionName);
+                                                }
+                                            }}
+                                            onClick={(e) => e.stopPropagation()}
+                                            autoFocus
+                                        />
+                                    ) : (
+                                        <span>{chat.session_name || 'Unnamed session'}</span>
+                                    )}
                                     <div className="dropdown">
                                         <button
                                             className="btn btn-ghost btn-sm p-1"
@@ -268,6 +424,11 @@ const MainPage = () => {
                                                 <button
                                                     className="dropdown-item"
                                                     type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditSessionId(chat.session_id);
+                                                        setSessionName(chat.session_name || '');
+                                                    }}
                                                 >
                                                     Rename
                                                 </button>
@@ -323,8 +484,43 @@ const MainPage = () => {
                     <div className="flex-grow-1 overflow-auto">
                         {!chatStarted ? (
                             <div className="welcome-container">
-                                <h2>Welcome to AI Interview Assistant</h2>
-                                <p>Start a conversation to begin your interview preparation</p>
+                                <h2>Hi! I am your interview assistant.</h2>
+                                <h5>Please upload your resume and job description to start the chat!</h5>
+                                <div className='welcome-form'>
+                                    <div className='mb-3'>
+                                        <label className='form-label'>Job Description</label>
+                                        <textarea
+                                            className='form-control'
+                                            rows='4'
+                                            placeholder='Please input the job description here...'
+                                            value={jobDescription}
+                                            onChange={(e) => setJobDescription(e.target.value)}
+                                        ></textarea>
+                                    </div>
+                                    <div className='mb-3'>
+                                        <label className='form-label'>Resume</label>
+                                        <div className='input-group'>
+                                            <input
+                                                type='file'
+                                                className='form-control'
+                                                accept='.pdf,.docx'
+                                                onChange={(e) => setResumeFile(e.target.files[0])}
+                                            />
+                                        </div>
+                                        {resumeFile && (
+                                            <small className='text-muted'>
+                                                Selected file: {resumeFile.name}
+                                            </small>
+                                        )}
+                                    </div>
+                                    <button
+                                        className='btn btn-dark'
+                                        disabled={!jobDescription.trim() || !resumeFile}
+                                        onClick={handleStartInterview}
+                                    >
+                                        Start Chat
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <div className="p-4">
