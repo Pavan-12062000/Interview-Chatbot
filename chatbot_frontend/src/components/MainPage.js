@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, LogOut, Mic, FileUp, MoreVertical } from 'lucide-react';
-import { getChatHistory, getChatMessages, createChatSession, sendMessage, deleteChatSession, uploadFile, startInterviewChat, renameSession } from '../services/authService';
+import { getChatHistory, getChatMessages, createChatSession, sendMessage, deleteChatSession, startInterviewChat, renameSession } from '../services/authService';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
 
@@ -14,11 +14,12 @@ const MainPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [isUploading, setIsUploading] = useState(false);
     const [jobDescription, setJobDescription] = useState('');
     const [resumeFile, setResumeFile] = useState(null);
     const [editSessionId, setEditSessionId] = useState(null);
     const [sessionName, setSessionName] = useState('');
+    const [latestChatSession, setLatestChatSession] = useState('');
+    const [isLatestChat, setIsLatestChat] = useState(false);
 
 
     // Load chat history on component mount
@@ -30,6 +31,9 @@ const MainPage = () => {
                 if (userId) {
                     const history = await getChatHistory(userId);
                     setChatHistory(history);
+                    if (history.length > 0) {
+                        setLatestChatSession(history[0].session_id);
+                    }
                 }
             } catch (err) {
                 console.error('Error loading chat history:', err);
@@ -138,6 +142,12 @@ const MainPage = () => {
                 setChatStarted(true);
                 setMessages(messages);
             }
+
+            if (chatId == latestChatSession) {
+                setIsLatestChat(true);
+            } else {
+                setIsLatestChat(false);
+            }
         } catch (err) {
             console.error('Error loading chat messages:', err);
             setError('Failed to load chat messages');
@@ -174,7 +184,7 @@ const MainPage = () => {
 
             setActiveChat(newSession.session_id);
             setMessages([]);
-
+            setLatestChatSession(newSession.session_id);
             setJobDescription('');
             setResumeFile(null);
             setChatStarted(false);
@@ -198,30 +208,6 @@ const MainPage = () => {
         } catch (err) {
             console.error('Error deleting chat:', err);
             setError('Failed to delete chat');
-        }
-    };
-
-    // Handle file upload
-    const handleFileUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const userMessage = {
-            id: Date.now(),
-            sender: 'user',
-            message: message
-        };
-        setMessages(prevMessages => [...prevMessages, userMessage]);
-
-        try {
-            setIsUploading(true);
-            const response = await startInterviewChat(activeChat, userMessage, file);
-            await loadChatMessages(activeChat);
-        } catch (err) {
-            console.error('Error uploading file:', err);
-            setError('Failed to upload file');
-        } finally {
-            setIsUploading(false);
         }
     };
 
@@ -266,10 +252,10 @@ const MainPage = () => {
 
     const handleStartInterview = async () => {
         try {
-            console.log('Starting interview with:', {
-                jobDescription,
-                resumeFile: resumeFile ? resumeFile.name : null
-            });
+            //console.log('Starting interview with:', {
+            //jobDescription,
+            //resumeFile: resumeFile ? resumeFile.name : null
+            //});
             setLoading(true);
             let currentSessionId = activeChat;
             let sessionCreated = false;
@@ -296,6 +282,8 @@ const MainPage = () => {
                 });
                 currentSessionId = newSession.session_id;
                 setActiveChat(currentSessionId);
+                setLatestChatSession(currentSessionId);
+                setIsLatestChat(true);
                 sessionCreated = true;
             }
 
@@ -314,15 +302,14 @@ const MainPage = () => {
                     message: `Job Description:\n${jobDescription}`
                 }]);
 
-                setJobDescription('');
-                setResumeFile(null);
-
                 setMessages(prevMessages => [...prevMessages, {
                     id: Date.now(),
                     sender: 'ai',
                     message: response
                 }])
 
+                setJobDescription('');
+                setResumeFile(null);
                 if (sessionCreated) {
                     const userId = JSON.parse(localStorage.getItem('user_info'))?.id;
                     const history = await getChatHistory(userId);
@@ -547,6 +534,7 @@ const MainPage = () => {
                         <div className="container-fluid">
                             <div className="input-group-container">
                                 <div className="input-group">
+                                    {/*
                                     <button
                                         className="btn btn-ghost"
                                         title="Voice input"
@@ -554,6 +542,7 @@ const MainPage = () => {
                                     >
                                         <Mic size={20} />
                                     </button>
+                                    */}
                                     <input
                                         type="text"
                                         className="form-control"
@@ -561,25 +550,14 @@ const MainPage = () => {
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         onKeyPress={handleKeyPress}
+                                        disabled={!chatStarted || !isLatestChat}
                                     />
-                                    <input
-                                        type="file"
-                                        id="file-upload"
-                                        hidden
-                                        accept=".pdf,.docx"
-                                        onChange={handleFileUpload}
-                                    />
-                                    <button
-                                        className="btn btn-ghost"
-                                        title="Upload file"
-                                        onClick={() => document.getElementById('file-upload').click()}
-                                    >
-                                        <FileUp size={20} />
-                                    </button>
+
+
                                     <button
                                         className="btn btn-dark px-4"
                                         onClick={handleSend}
-                                        disabled={loading || isUploading}
+                                        disabled={loading || !chatStarted || !isLatestChat}
                                     >
                                         Send
                                     </button>

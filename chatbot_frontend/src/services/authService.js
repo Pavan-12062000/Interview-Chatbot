@@ -247,25 +247,6 @@ export const startInterviewChat = async (sessionId, jobDescription, resumeFile) 
     }
 };
 
-export const uploadFile = async (sessionId, file) => {
-    try {
-        const formData = new FormData();
-        formData.append('resume', file);
-        formData.append('session_id', sessionId);
-        formData.append('flag', 'true');
-
-        const response = await api.post('/chat', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        return response.data;
-    } catch (error) {
-        console.error('File upload error:', error.response || error);
-        throw new Error(error.response?.data?.message || 'Failed to upload file');
-    }
-};
-
 export const renameSession = async (sessionId, newName) => {
     try {
         const response = await api.post('/rename', {
