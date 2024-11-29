@@ -72,31 +72,46 @@ This chatbot serves:
 - Clone the repository using:  
   ```bash
   git clone <repository_url>
-Navigate to the project directory and install dependencies for both frontend and backend:
-cd frontend
-npm install
 
-cd ../backend
-npm install
-Configure the PostgreSQL database connection in the .env file within the backend folder.
-2. Running the Application
-Start the backend server:
+### **Navigate to the project directory and install dependencies for both frontend and backend:**
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+   ```bash
+   cd ../backend
+   npm install
+   ```
+
+## **Configure the PostgreSQL database connection in the .env file within the backend folder.**
+### **2. Running the Application **
+- Start the backend server:
+```bash
 cd backend
 npm start
-Start the React frontend:
+```
+
+- Start the React frontend:
+```bash
 cd frontend
 npm start
-Access the platform in your browser at http://localhost:3000.
-3. Using the Platform
-Register/Login:
+```
+**Access the platform in your browser at http://localhost:3000.**
+### **3. Using the Platform**
+- Register/Login:
 New users can register for an account, while returning users can log in using their credentials.
-Upload Resume and Job Description:
+
+- Upload Resume and Job Description:
 Upload your resume and the desired job description. The chatbot analyzes these documents and provides insights on skills alignment and areas needing improvement.
-Simulate Interviews:
+
+- Simulate Interviews:
 Engage in realistic, AI-driven interview simulations.
 Receive instant feedback after each question, helping you improve your responses in real time.
-View Personalized Feedback:
+
+- View Personalized Feedback:
 Access detailed reports on your performance, including strengths, weaknesses, and actionable recommendations for improvement.
+
 4. Customization
 Modify prompts, feedback algorithms, or question databases by editing backend files to tailor the platform to specific needs.
 
