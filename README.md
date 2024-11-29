@@ -84,7 +84,8 @@ This chatbot serves:
    npm install
    ```
 
-## **Configure the PostgreSQL database connection in the .env file within the backend folder.**
+**Configure the PostgreSQL database connection in the .env file within the backend folder.**
+
 ### **2. Running the Application **
 - Start the backend server:
 ```bash
@@ -112,7 +113,7 @@ Receive instant feedback after each question, helping you improve your responses
 - View Personalized Feedback:
 Access detailed reports on your performance, including strengths, weaknesses, and actionable recommendations for improvement.
 
-4. Customization
+### **4. Customization**
 Modify prompts, feedback algorithms, or question databases by editing backend files to tailor the platform to specific needs.
 
 # Interview-Chatbot
