@@ -81,7 +81,7 @@ This chatbot serves:
 
 ### **3.Install PostgreSQL database and Create a database in pgAdmin and the scripts are there in DB Scripts.txt file in the root directory of chatbot_backend folder.**
 
-### **4.Create a .env file in the root directory and add the below in the .env file: **
+### 4.Create a .env file in the root directory and add the below in the .env file: 
 **NEBIUS_API_KEY = "your_api_key"**
 
 
