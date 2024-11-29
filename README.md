@@ -68,60 +68,48 @@ This chatbot serves:
 
 ## **Usage Instructions**  
 
-### **1. Setting Up**  
+### **1.Clone the repository:**  
 - Clone the repository using:  
   ```bash
-  git clone <repository_url>
+  git clone "https://github.com/Pavan-12062000/Interview-Chatbot"
+  ```
 
-### **Navigate to the project directory and install dependencies for both frontend and backend:**
+### **2.Navigate to the backend service:**
    ```bash
-   cd frontend
-   npm install
+   cd chatbot_backend
    ```
 
+### **3.Install PostgreSQL database and Create a database in pgAdmin and the scripts are there in DB Scripts.txt file in the root directory of chatbot_backend folder.**
+
+### **4.Create a .env file in the root directory and add the below in the .env file: **
+**NEBIUS_API_KEY = "your_api_key"**
+
+
+### **5.Install all the required dependencies:**
    ```bash
-   cd ../backend
-   npm install
+   npm i
    ```
 
-**Configure the PostgreSQL database connection in the .env file within the backend folder.**
+### **6. Update the below fields in dbconenction.js file with your credentials:**
+- database: 'your_database_name'
+- password: 'your_password'
 
-### **2. Running the Application **
-- Start the backend server:
-```bash
-cd backend
-npm start
-```
+### **7. To run the backend service, run the below command:**
+   ```bash
+   node app
+   ```
 
-- Start the React frontend:
-```bash
-cd frontend
-npm start
-```
-**Access the platform in your browser at http://localhost:3000.**
-### **3. Using the Platform**
-- Register/Login:
-New users can register for an account, while returning users can log in using their credentials.
+### **8. Open a new terminal and navigate to the frontend service:**
+   ```bash
+   cd chatbot_frontend
+  
+   ```   
+### **9. Install all the required dependencies:**
+   ```bash
+   npm i
+   ```   
 
-- Upload Resume and Job Description:
-Upload your resume and the desired job description. The chatbot analyzes these documents and provides insights on skills alignment and areas needing improvement.
-
-- Simulate Interviews:
-Engage in realistic, AI-driven interview simulations.
-Receive instant feedback after each question, helping you improve your responses in real time.
-
-- View Personalized Feedback:
-Access detailed reports on your performance, including strengths, weaknesses, and actionable recommendations for improvement.
-
-### **4. Customization**
-Modify prompts, feedback algorithms, or question databases by editing backend files to tailor the platform to specific needs.
-
-# Interview-Chatbot
-To run:
-1. npm i
-2. cd chatbot_froentend
+### **10. To run the frontend service, run the below command:**
+   ```bash
    npm start
-3. cd chatbot_backend
-   nodemon app
-
-Configure your local database
+   ```
