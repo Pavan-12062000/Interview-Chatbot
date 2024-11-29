@@ -20,13 +20,9 @@ class getDbConnection {
           logError(err);
         });
       }
-
-      console.log("In DB connect try block");
       const client = await pool.connect();
-      console.log("Connected to database");
       return client;
     } catch (err) {
-      logError("Error in connecting to database");
       logError(err);
       throw err; // re-throw the error to handle it in the calling function
     }
