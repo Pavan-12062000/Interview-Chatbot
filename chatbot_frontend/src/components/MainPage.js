@@ -266,10 +266,10 @@ const MainPage = () => {
 
     const handleStartInterview = async () => {
         try {
-            console.log('Starting interview with:', {
-                jobDescription,
-                resumeFile: resumeFile ? resumeFile.name : null
-            });
+            //console.log('Starting interview with:', {
+            //jobDescription,
+            //resumeFile: resumeFile ? resumeFile.name : null
+            //});
             setLoading(true);
             let currentSessionId = activeChat;
             let sessionCreated = false;
@@ -547,6 +547,7 @@ const MainPage = () => {
                         <div className="container-fluid">
                             <div className="input-group-container">
                                 <div className="input-group">
+                                    {/*
                                     <button
                                         className="btn btn-ghost"
                                         title="Voice input"
@@ -554,6 +555,7 @@ const MainPage = () => {
                                     >
                                         <Mic size={20} />
                                     </button>
+                                    */}
                                     <input
                                         type="text"
                                         className="form-control"
@@ -561,25 +563,14 @@ const MainPage = () => {
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         onKeyPress={handleKeyPress}
+                                        disabled={!chatStarted}
                                     />
-                                    <input
-                                        type="file"
-                                        id="file-upload"
-                                        hidden
-                                        accept=".pdf,.docx"
-                                        onChange={handleFileUpload}
-                                    />
-                                    <button
-                                        className="btn btn-ghost"
-                                        title="Upload file"
-                                        onClick={() => document.getElementById('file-upload').click()}
-                                    >
-                                        <FileUp size={20} />
-                                    </button>
+
+
                                     <button
                                         className="btn btn-dark px-4"
                                         onClick={handleSend}
-                                        disabled={loading || isUploading}
+                                        disabled={loading || isUploading || !chatStarted}
                                     >
                                         Send
                                     </button>
