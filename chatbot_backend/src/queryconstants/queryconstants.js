@@ -16,6 +16,8 @@ class queryConstants {
 
     renameSession = `UPDATE chat_sessions SET session_name = $1, created_at = now()  WHERE session_id = $2`;
 
+    forgotPassword = `update register set password = $2 where email = $1`;
+
 }
 
 module.exports = new queryConstants();

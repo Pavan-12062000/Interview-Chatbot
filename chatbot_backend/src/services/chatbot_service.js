@@ -129,6 +129,19 @@ class ChatbotService {
             logError(err);
         }
     }
+
+    async forgotPassword(req){
+        const params =  req.body.params;
+        let response;
+        const email = params.email;
+        const password = params.password;
+        try{
+            response = await dbConnectionInstance.forgotPassword(email, password);
+            return response;
+        }catch(err){
+            logError(err);
+        }
+    }
 }
  
 module.exports = ChatbotService;
