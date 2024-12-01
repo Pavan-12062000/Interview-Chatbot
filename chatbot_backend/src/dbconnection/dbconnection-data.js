@@ -31,17 +31,17 @@ class DbConnection {
     }
 
     async register(firstname, lastname, email, password) {
-        let query = queryConstantsInstance.register;
-        let params = [firstname, lastname, email, password];
-        const response = await this.executeQuery(query, params);
-        return response;
+            let query = queryConstantsInstance.register;
+            let params = [firstname, lastname, email, password];
+            const response = await this.executeQuery(query, params);
+            return response;
     }
 
     async login(email, password) {
-        let query = queryConstantsInstance.login;
-        let params = [email, password];
-        const response = await this.executeQuery(query, params);
-        return response.rows;
+            let query = queryConstantsInstance.login;
+            let params = [email, password];
+            const response = await this.executeQuery(query, params);
+            return response.rows;
     }
 
     previousMessages = [];
@@ -108,7 +108,6 @@ class DbConnection {
             this.resume = resume;
             message = `Hi there! This is my resume: ${resume} and the job descrioption is: ${job_description}`;
             this.previousMessages.push({ role: "user", content: message });
-            await this.saveChatHistory(session_id, "user", `Job Description:\n${job_description}`);
             aiResponse = await this.getAIResponse(message, job_description, resume, this.previousMessages);
             // Save the user and AI responses to chat history
             this.previousMessages.push({ role: "assistant", content: aiResponse });
@@ -137,24 +136,22 @@ class DbConnection {
     }
 
     async home(user_id) {
-        let query = queryConstantsInstance.getSessionIds;
-        let params = [user_id];
-        const response = await this.executeQuery(query, params);
-        return response.rows;
+            let query = queryConstantsInstance.getSessionIds;
+            let params = [user_id];
+            const response = await this.executeQuery(query, params);
+            return response.rows;
     }
 
     async chatHistory(session_id) {
-        let query = queryConstantsInstance.getChatHistory;
-        let params = [session_id];
-        const response = await this.executeQuery(query, params);
-        return response.rows;
+            let query = queryConstantsInstance.getChatHistory;
+            let params = [session_id];
+            const response = await this.executeQuery(query, params);
+            return response.rows;
     }
 
     async createChatSession(user_id, session_name) {
         let client;
         try {
-            this.job_description = '';
-            this.resume = '';
             client = await getDbConnectionInstance.getConnection();
             let query = queryConstantsInstance.createChatSession;
             let params = [user_id, session_name];
@@ -171,10 +168,10 @@ class DbConnection {
     }
 
     async deleteChatSession(session_id) {
-        let query = queryConstantsInstance.deleteChatSession;
-        let params = [session_id];
-        const response = await this.executeQuery(query, params);
-        return response;
+            let query = queryConstantsInstance.deleteChatSession;
+            let params = [session_id];
+            const response = await this.executeQuery(query, params);
+            return response;
     }
 
     async processResume(filePath) {
@@ -208,6 +205,13 @@ class DbConnection {
         let params = [session_name, session_id];
         const response = await this.executeQuery(query, params);
         return response.rows[0]; // Return the renamed session
+    }
+
+    async forgotPassword(email) {
+        let query = queryConstantsInstance.forgotPassword;
+        let params = [email, password];
+        const response = await this.executeQuery(query, params);
+        return response.rows[0]; // Return the user details
     }
 }
 
