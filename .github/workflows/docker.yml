@@ -26,7 +26,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./frontend
-          file: ./frontend/Dockerfile
+          file: ./chatbot_frontend/Dockerfile
           push: true
           tags: your-username/frontend:latest
 
@@ -34,6 +34,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./backend
-          file: ./backend/Dockerfile
+          file: ./chatbot_backend/Dockerfile
           push: true
           tags: your-username/backend:latest
