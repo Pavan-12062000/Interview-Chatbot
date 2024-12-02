@@ -25,7 +25,7 @@ jobs:
       - name: Build and push frontend image
         uses: docker/build-push-action@v3
         with:
-          context: ./frontend
+          context: ./chatbot_frontend
           file: ./chatbot_frontend/Dockerfile
           push: true
           tags: your-username/frontend:latest
@@ -33,7 +33,7 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v3
         with:
-          context: ./backend
+          context: ./chatbot_backend
           file: ./chatbot_backend/Dockerfile
           push: true
           tags: your-username/backend:latest
