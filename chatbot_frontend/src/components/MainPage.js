@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, LogOut, Mic, FileUp, MoreVertical } from 'lucide-react';
+import { Menu, LogOut, Mic, MoreVertical } from 'lucide-react';
 import { getChatHistory, getChatMessages, createChatSession, sendMessage, deleteChatSession, startInterviewChat, renameSession } from '../services/authService';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
@@ -122,7 +122,7 @@ const MainPage = () => {
 
     // Handle chat selection
     const handleChatSelect = async (chatId) => {
-        if (loading) return;
+        //if (loading) return;
 
         try {
             setLoading(true);
