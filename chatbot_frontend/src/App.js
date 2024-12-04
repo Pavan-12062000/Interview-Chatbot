@@ -18,7 +18,7 @@ function App() {
       <Route path="/mainpage" element={<MainPage />} />
       <Route path="/homepage" element={<HomePage />} />
       <Route path="/resetpassword" element={<ResetPassword />} />
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/" element={<Navigate to="/homepage" />} />
     </Routes>
   );
 }
