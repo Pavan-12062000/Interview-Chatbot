@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://localhost:8080';
+// const API_BASE_URL = 'https://localhost:8080';       //Uncomment this line and comment the next line if you are using HTTPS
+
+const API_BASE_URL = 'http://localhost:8080'; // Uncomment this line and comment the previous line if you are using HTTP
 
 // Store user info
 const TOKEN_KEY = 'auth_token';
