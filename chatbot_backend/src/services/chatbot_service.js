@@ -142,6 +142,18 @@ class ChatbotService {
             logError(err);
         }
     }
+
+    async progressGraph(req){
+        const params = req.body.params;
+        let response;
+        const user_id = params.user_id;
+        try{
+            response = await dbConnectionInstance.progressGraph(user_id);
+            return response;
+        }catch(err){
+            logError(err);
+        }
+    }
 }
  
 module.exports = ChatbotService;
