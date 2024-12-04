@@ -12,15 +12,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
     cors({
-        origin: 'http://localhost:3000', // Adjust based on your frontend's URL
+        origin: 'https://localhost:3000', // Adjust based on your frontend's URL
         optionsSuccessStatus: 200,
     })
 );
+
 app.use('/', router);
 
 // Load SSL certificate and private key
-const privateKey = fs.readFileSync('', 'utf8'); // Path to private-key.pem
-const certificate = fs.readFileSync('', 'utf8'); // Path to certificate.pem
+const privateKey = fs.readFileSync('.././certificates/private-key.pem', 'utf8'); // Path to private-key.pem
+const certificate = fs.readFileSync('.././certificates/certificate.pem', 'utf8'); // Path to certificate.pem
 
 const credentials = { key: privateKey, cert: certificate };
 

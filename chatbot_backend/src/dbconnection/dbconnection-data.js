@@ -107,6 +107,8 @@ class DbConnection {
             this.job_description = job_description;
             this.resume = resume;
             message = `Hi there! This is my resume: ${resume} and the job descrioption is: ${job_description}`;
+            // Save the user message to chat history
+            await this.saveChatHistory(session_id, "user", message);
             this.previousMessages.push({ role: "user", content: message });
             aiResponse = await this.getAIResponse(message, job_description, resume, this.previousMessages);
             // Save the user and AI responses to chat history
@@ -213,6 +215,122 @@ class DbConnection {
         const response = await this.executeQuery(query, params);
         return response.rows[0]; // Return the user details
     }
+
+    async getAIGraphResponse(response1) {
+        try {
+            const messages = [
+                {
+                    role: "system",
+                    content: `You are a professional job interviewer specializing in conducting structured and conversational interviews. 
+                    Analyze the conversation history provided below to evaluate the user's performance in the interview. 
+
+                    Focus on evaluating the user's performance in the following areas for each session:
+                    1. Clarity of Thought: How clearly the user expresses their ideas.
+                    2. Relevance: How well the user's responses align with the questions asked.
+                    3. Depth of Knowledge: The depth and accuracy of the information provided by the user.
+                    4. Engagement: How engaged and responsive the user is throughout the conversation.
+
+                    Please provide the results in a JSON format with the following structure only (without any other text or code):
+
+                    {
+                        "sessions": [
+                            {
+                            "session_id": "<Session ID>",
+                            "session_name": "<Session Name>",
+                            "scores": {
+                                "Clarity_of_Thought": <Score>,
+                                "Relevance": <Score>,
+                                "Depth_of_Knowledge": <Score>,
+                                "Engagement": <Score>
+                            }
+                            },
+                            ...
+                        ],
+                        "overall": {
+                            "Clarity_of_Thought": <Average Score>,
+                            "Relevance": <Average Score>,
+                            "Depth_of_Knowledge": <Average Score>,
+                            "Engagement": <Average Score>
+                        },
+                        "summary": {
+                            "strengths": "<Key strengths>",
+                            "areas_of_improvement": "<Key areas for improvement>"
+                        }
+                    }
+                    Chat History: '${response1}'`
+                }
+            ];
+
+            const response = await axios.post(
+                "https://api.studio.nebius.ai/v1/chat/completions",
+                {
+                    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
+                    messages: messages,
+                    max_tokens: 1024, // Adjust as needed while considering token limits
+                    temperature: 0.7,
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${NEBIUS_API_KEY}`,
+                    },
+                }
+            );
+            return response.data.choices[0].message.content.trim();
+        } catch (error) {
+            throw new Error("Nebius AI API error");
+        }
+    }
+
+    async progressGraph(user_id) {
+        const sessions = await this.home(user_id);
+    
+        // Format sessions with chat history
+        const formattedSessions = await Promise.all(
+            sessions.map(async (session) => {
+                const chatHistory = await this.chatHistory(session.session_id);
+                const messages = chatHistory.map((entry) => ({
+                    type: entry.sender === "Ai" ? "question" : "response",
+                    content: entry.message,
+                    timestamp: entry.timestamp,
+                }));
+                return {
+                    session_id: session.session_id,
+                    session_name: session.session_name,
+                    messages: messages,
+                };
+            })
+        );
+    
+        // Convert to plain text for Nebius AI
+        const plainText = await this.formatChatForNebius(formattedSessions);
+        console.log("Formatted Sessions (Plain Text):", plainText);
+    
+        // Send plain text to Nebius AI
+        const aiResponse = await this.getAIGraphResponse(plainText);
+        console.log("AI Response:", aiResponse);
+        return aiResponse;
+    }
+    
+    // Utility function to convert chat history to plain text
+    async formatChatForNebius(sessions) {
+        let formattedText = "";
+    
+        sessions.forEach((session) => {
+            formattedText += `Session: ${session.session_name}\n`;
+    
+            session.messages.forEach((message) => {
+                formattedText += `Timestamp: ${message.timestamp}\n`;
+                formattedText += `${message.type}: ${message.content}\n`;
+            });
+    
+            formattedText += "\n"; // Separate sessions
+        });
+    
+        return formattedText.trim(); // Remove any trailing newlines
+    }
+    
+    
 }
 
 module.exports = DbConnection;

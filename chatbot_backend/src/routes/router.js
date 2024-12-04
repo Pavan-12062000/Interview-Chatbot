@@ -137,4 +137,13 @@ router.post('/forgotPassword', async (req, res) => {
     }
 })
 
+router.post('/progressGraph', async (req, res) => {
+    try{
+        const response = await chatbotService.progressGraph(req);
+        res.send(response);
+    }catch(err){
+        logError(err);
+    }
+})
+
 module.exports = router;
