@@ -24,10 +24,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "cross-env HTTPS=true SSL_CRT_FILE=.././certificates/certificate.pem SSL_KEY_FILE=.././certificates/private-key.pem react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject" 
   },
   "eslintConfig": {
     "extends": [
