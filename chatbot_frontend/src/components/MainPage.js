@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Menu, LogOut, Mic, MoreVertical } from 'lucide-react';
+import { Container, Row, Col } from 'react-bootstrap';
 import { getChatHistory, getChatMessages, createChatSession, sendMessage, deleteChatSession, startInterviewChat, renameSession } from '../services/authService';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
+import logoImg from '../assets/images/2.0.png';
 
 const MainPage = () => {
     // States
@@ -20,7 +22,7 @@ const MainPage = () => {
     const [sessionName, setSessionName] = useState('');
     const [latestChatSession, setLatestChatSession] = useState('');
     const [isLatestChat, setIsLatestChat] = useState(false);
-
+    const messageAreaRef = useRef(null);
 
     // Load chat history on component mount
     useEffect(() => {
@@ -53,6 +55,15 @@ const MainPage = () => {
             setChatStarted(false);
         };
     }, []);
+
+    useEffect(() => {
+        if (messages.length > 0 && messageAreaRef.current) {
+            const scrollHeight = messageAreaRef.current.scrollHeight;
+            const height = messageAreaRef.current.clientHeight;
+            const maxScrollTop = scrollHeight - height;
+            messageAreaRef.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+        }
+    }, [messages, loading]);
 
     // Load messages for a specific chat
     const loadChatMessages = async (sessionId) => {
@@ -296,17 +307,19 @@ const MainPage = () => {
             if (response) {
                 setChatStarted(true);
 
-                setMessages(prevMessages => [...prevMessages, {
+                const userMessage = {
                     id: Date.now(),
                     sender: 'user',
                     message: `Job Description:\n${jobDescription}`
-                }]);
+                };
 
-                setMessages(prevMessages => [...prevMessages, {
-                    id: Date.now(),
+                const aiMessage = {
+                    id: Date.now() + 1,
                     sender: 'ai',
                     message: response
-                }])
+                };
+
+                setMessages([userMessage, aiMessage]);
 
                 setJobDescription('');
                 setResumeFile(null);
@@ -345,163 +358,146 @@ const MainPage = () => {
         }
     };
 
+    const TypingAnimation = () => (
+        <div className="message loading">
+            <div className="typing-animation">
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+            </div>
+        </div>
+    );
+
     return (
-        <div className="container-fluid vh-100 p-0">
-            <div className="row h-100 g-0">
+        <div className="mainpage">
+            <Row className="h-100 g-0">
                 {/* Sidebar */}
-                <div
-                    className="sidebar transition-all"
-                    style={{
-                        width: isSidebarVisible ? '250px' : '0',
-                        minWidth: isSidebarVisible ? '250px' : '0'
-                    }}
-                >
-                    <div className="sidebar-content h-100 d-flex flex-column">
-                        {/* New Chat Button */}
-                        <div className="p-3">
-                            <button
-                                className="btn btn-outline-dark w-100 text-start"
-                                onClick={handleNewChat}
-                            >
+                <Col className={`sidebar ${!isSidebarVisible ? 'closed' : ''}`} xs="auto">
+                    <div className="sidebar-content">
+                        <div className="chat-actions p-3">
+                            <button className="new-chat-btn" onClick={handleNewChat}>
                                 + New chat
                             </button>
                         </div>
 
-                        {/* Chat History */}
-                        <div className="px-3 flex-grow-1 overflow-auto">
+                        <div className="chat-list">
                             {chatHistory.map((chat) => (
                                 <div
                                     key={chat.session_id}
-                                    className={`chat-history-item d-flex justify-content-between align-items-center ${activeChat === chat.session_id ? 'active' : ''}`}
+                                    className={`chat-history-item ${activeChat === chat.session_id ? 'active' : ''}`}
                                     onClick={() => handleChatSelect(chat.session_id)}
                                 >
-                                    {editSessionId === chat.session_id ? (
-                                        <input
-                                            type="text"
-                                            className="form-control form-control-sm"
-                                            value={sessionName}
-                                            onChange={(e) => setSessionName(e.target.value)}
-                                            onKeyPress={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    handleRename(chat.session_id, sessionName);
-                                                }
-                                            }}
-                                            onClick={(e) => e.stopPropagation()}
-                                            autoFocus
-                                        />
-                                    ) : (
-                                        <span>{chat.session_name || 'Unnamed session'}</span>
-                                    )}
-                                    <div className="dropdown">
+                                    <span className="chat-title">
+                                        {editSessionId === `rename-${chat.session_id}` ? (
+                                            <input
+                                                type="text"
+                                                className="rename-input"
+                                                value={sessionName}
+                                                onChange={(e) => setSessionName(e.target.value)}
+                                                onKeyPress={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        handleRename(chat.session_id, sessionName);
+                                                    }
+                                                }}
+                                                onClick={(e) => e.stopPropagation()}
+                                                autoFocus
+                                            />
+                                        ) : (
+                                            chat.session_name || 'Unnamed session'
+                                        )}
+                                    </span>
+
+
+                                    <div className="chat-menu">
                                         <button
-                                            className="btn btn-ghost btn-sm p-1"
-                                            type="button"
-                                            id={`dropdownMenuButton-${chat.session_id}`}
-                                            data-bs-toggle="dropdown"
-                                            aria-expanded="false"
-                                            onClick={(e) => e.stopPropagation()}
+                                            className="menu-trigger"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditSessionId(editSessionId === chat.session_id ? null : chat.session_id);
+                                            }}
                                         >
                                             <MoreVertical size={16} />
                                         </button>
-                                        <ul
-                                            className="dropdown-menu dropdown-menu-end"
-                                            aria-labelledby={`dropdownMenuButton-${chat.session_id}`}
-                                        >
-                                            <li>
+                                        {editSessionId === chat.session_id && (
+                                            <div className="menu-options">
                                                 <button
-                                                    className="dropdown-item"
-                                                    type="button"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        setEditSessionId(chat.session_id);
+                                                        setEditSessionId(`rename-${chat.session_id}`);
                                                         setSessionName(chat.session_name || '');
                                                     }}
                                                 >
                                                     Rename
                                                 </button>
-                                            </li>
-                                            <li>
                                                 <button
-                                                    className="dropdown-item text-danger"
-                                                    type="button"
+                                                    className="delete-option"
                                                     onClick={(e) => handleDeleteChat(chat.session_id, e)}
                                                 >
                                                     Delete
                                                 </button>
-                                            </li>
-                                        </ul>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
-                </div>
+                </Col>
 
-                {/* Main Chat Area */}
-                <div className="col h-100 d-flex flex-column">
+                {/* Main Content */}
+                <Col className="main-content">
                     {/* Header */}
-                    <div className="chat-header border-bottom d-flex align-items-center justify-content-between">
-                        <button
-                            className="btn btn-ghost p-2"
-                            onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-                        >
+                    <div className="main-header">
+                        <button className="control-btn" onClick={() => setIsSidebarVisible(!isSidebarVisible)}>
                             <Menu size={20} />
                         </button>
-                        <button
-                            className="btn btn-ghost p-2"
-                            onClick={handleLogout}
-                        >
+                        <div className='logo-title'>
+                            <img className='logo' src={logoImg} alt='logoImg'></img>
+                            <h1>IntervBot</h1>
+                        </div>
+                        <button className="control-btn" onClick={handleLogout}>
                             <LogOut size={20} />
                         </button>
                     </div>
 
                     {/* Error Alert */}
                     {error && (
-                        <div className="alert alert-danger alert-dismissible fade show m-2" role="alert">
+                        <div className="error-message">
                             {error}
-                            <button
-                                type="button"
-                                className="btn-close"
-                                onClick={() => setError(null)}
-                            ></button>
+                            <button className="close-error" onClick={() => setError(null)}>×</button>
                         </div>
                     )}
 
-                    {/* Messages Area */}
-                    <div className="flex-grow-1 overflow-auto">
+                    {/* Chat Content */}
+                    <div className="chat-content">
                         {!chatStarted ? (
-                            <div className="welcome-container">
-                                <h2>Hi! I am your interview assistant.</h2>
+                            <div className="welcome-screen">
+                                <h2>Hi! Welcome to use IntervBot.</h2>
                                 <h5>Please upload your resume and job description to start the chat!</h5>
-                                <div className='welcome-form'>
-                                    <div className='mb-3'>
-                                        <label className='form-label'>Job Description</label>
+                                <div className="welcome-form">
+                                    <div className="form-group">
+                                        <label>Job Description</label>
                                         <textarea
-                                            className='form-control'
-                                            rows='4'
-                                            placeholder='Please input the job description here...'
+                                            placeholder="Please input the job description here..."
                                             value={jobDescription}
                                             onChange={(e) => setJobDescription(e.target.value)}
-                                        ></textarea>
+                                        />
                                     </div>
-                                    <div className='mb-3'>
-                                        <label className='form-label'>Resume</label>
-                                        <div className='input-group'>
-                                            <input
-                                                type='file'
-                                                className='form-control'
-                                                accept='.pdf,.docx'
-                                                onChange={(e) => setResumeFile(e.target.files[0])}
-                                            />
-                                        </div>
+                                    <div className="form-group">
+                                        <label>Resume</label>
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.docx"
+                                            onChange={(e) => setResumeFile(e.target.files[0])}
+                                        />
                                         {resumeFile && (
-                                            <small className='text-muted'>
+                                            <div className="file-info">
                                                 Selected file: {resumeFile.name}
-                                            </small>
+                                            </div>
                                         )}
                                     </div>
                                     <button
-                                        className='btn btn-dark'
+                                        className="start-chat-btn"
                                         disabled={!jobDescription.trim() || !resumeFile}
                                         onClick={handleStartInterview}
                                     >
@@ -510,66 +506,42 @@ const MainPage = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-4">
+                            <div className="messages-area" ref={messageAreaRef}>
                                 {messages.map((msg) => (
-                                    <div key={msg.id} className="mb-4">
-                                        <p className={`message-bubble ${msg.sender === 'user' ? 'user-message' : 'ai-message'}`}>
-                                            {msg.message}
-                                        </p>
+                                    <div key={msg.id} className={`message ${msg.sender === 'user' ? 'user' : 'ai'}`}>
+                                        {msg.message}
                                     </div>
                                 ))}
-                                {loading && (
-                                    <div className="text-center">
-                                        <div className="spinner-border text-primary" role="status">
-                                            <span className="visually-hidden">Loading...</span>
-                                        </div>
-                                    </div>
-                                )}
+                                {loading && <TypingAnimation />}
                             </div>
                         )}
                     </div>
 
                     {/* Input Area */}
                     <div className="input-area">
-                        <div className="container-fluid">
-                            <div className="input-group-container">
-                                <div className="input-group">
-                                    {/*
-                                    <button
-                                        className="btn btn-ghost"
-                                        title="Voice input"
-                                        onClick={handleVoiceInput}
-                                    >
-                                        <Mic size={20} />
-                                    </button>
-                                    */}
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Type your message..."
-                                        value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
-                                        onKeyPress={handleKeyPress}
-                                        disabled={!chatStarted || !isLatestChat}
-                                    />
-
-
-                                    <button
-                                        className="btn btn-dark px-4"
-                                        onClick={handleSend}
-                                        disabled={loading || !chatStarted || !isLatestChat}
-                                    >
-                                        Send
-                                    </button>
-                                </div>
-                            </div>
-                            <p className="text-center text-muted mt-2 small">
-                                AI interview assistant. May produce inaccurate information.
-                            </p>
+                        <div className="input-container">
+                            <input
+                                type="text"
+                                placeholder="Type your message..."
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                                disabled={!chatStarted || !isLatestChat}
+                            />
+                            <button
+                                className="send-btn"
+                                onClick={handleSend}
+                                disabled={loading || !chatStarted || !isLatestChat}
+                            >
+                                Send
+                            </button>
+                        </div>
+                        <div className="disclaimer">
+                            AI interview assistant. May produce inaccurate information.
                         </div>
                     </div>
-                </div>
-            </div>
+                </Col>
+            </Row>
         </div>
     );
 };

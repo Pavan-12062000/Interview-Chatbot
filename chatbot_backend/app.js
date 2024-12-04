@@ -19,8 +19,8 @@ app.use(
 app.use('/', router);
 
 // Load SSL certificate and private key
-const privateKey = fs.readFileSync('', 'utf8'); // Path to private-key.pem
-const certificate = fs.readFileSync('', 'utf8'); // Path to certificate.pem
+const privateKey = fs.readFileSync('/Users/alfred/private.key', 'utf8'); // Path to private-key.pem
+const certificate = fs.readFileSync('/Users/alfred/certificate.crt', 'utf8'); // Path to certificate.pem
 
 const credentials = { key: privateKey, cert: certificate };
 

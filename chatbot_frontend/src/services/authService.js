@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'https://localhost:8080';
 
 // Store user info
 const TOKEN_KEY = 'auth_token';
@@ -261,3 +261,23 @@ export const renameSession = async (sessionId, newName) => {
         throw new Error(error.response?.data?.message || 'Failed to rename session');
     }
 };
+
+export const forgotPassword = async (email, newPassword) => {
+    try {
+        const response = await api.post('/forgotPassword', {
+            params: {
+                email: email,
+                password: newPassword
+            }
+        });
+
+        return {
+            success: true,
+            data: response.data
+        };
+
+    } catch (error) {
+        console.error('Reset password error:', error.response || error);
+        throw new Error(error.resposne?.data?.message || 'Failed to reset password!')
+    }
+}
