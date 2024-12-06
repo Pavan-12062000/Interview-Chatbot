@@ -31,17 +31,17 @@ class DbConnection {
     }
 
     async register(firstname, lastname, email, password) {
-            let query = queryConstantsInstance.register;
-            let params = [firstname, lastname, email, password];
-            const response = await this.executeQuery(query, params);
-            return response;
+        let query = queryConstantsInstance.register;
+        let params = [firstname, lastname, email, password];
+        const response = await this.executeQuery(query, params);
+        return response;
     }
 
     async login(email, password) {
-            let query = queryConstantsInstance.login;
-            let params = [email, password];
-            const response = await this.executeQuery(query, params);
-            return response.rows;
+        let query = queryConstantsInstance.login;
+        let params = [email, password];
+        const response = await this.executeQuery(query, params);
+        return response.rows;
     }
 
     previousMessages = [];
@@ -107,8 +107,7 @@ class DbConnection {
             this.job_description = job_description;
             this.resume = resume;
             message = `Hi there! This is my resume: ${resume} and the job descrioption is: ${job_description}`;
-            // Save the user message to chat history
-            await this.saveChatHistory(session_id, "user", message);
+            await this.saveChatHistory(session_id, "user", `Job description: ${job_description}`);
             this.previousMessages.push({ role: "user", content: message });
             aiResponse = await this.getAIResponse(message, job_description, resume, this.previousMessages);
             // Save the user and AI responses to chat history
@@ -138,17 +137,17 @@ class DbConnection {
     }
 
     async home(user_id) {
-            let query = queryConstantsInstance.getSessionIds;
-            let params = [user_id];
-            const response = await this.executeQuery(query, params);
-            return response.rows;
+        let query = queryConstantsInstance.getSessionIds;
+        let params = [user_id];
+        const response = await this.executeQuery(query, params);
+        return response.rows;
     }
 
     async chatHistory(session_id) {
-            let query = queryConstantsInstance.getChatHistory;
-            let params = [session_id];
-            const response = await this.executeQuery(query, params);
-            return response.rows;
+        let query = queryConstantsInstance.getChatHistory;
+        let params = [session_id];
+        const response = await this.executeQuery(query, params);
+        return response.rows;
     }
 
     async createChatSession(user_id, session_name) {
@@ -170,10 +169,10 @@ class DbConnection {
     }
 
     async deleteChatSession(session_id) {
-            let query = queryConstantsInstance.deleteChatSession;
-            let params = [session_id];
-            const response = await this.executeQuery(query, params);
-            return response;
+        let query = queryConstantsInstance.deleteChatSession;
+        let params = [session_id];
+        const response = await this.executeQuery(query, params);
+        return response;
     }
 
     async processResume(filePath) {
@@ -209,7 +208,7 @@ class DbConnection {
         return response.rows[0]; // Return the renamed session
     }
 
-    async forgotPassword(email) {
+    async forgotPassword(email, password) {
         let query = queryConstantsInstance.forgotPassword;
         let params = [email, password];
         const response = await this.executeQuery(query, params);
@@ -284,7 +283,7 @@ class DbConnection {
 
     async progressGraph(user_id) {
         const sessions = await this.home(user_id);
-    
+
         // Format sessions with chat history
         const formattedSessions = await Promise.all(
             sessions.map(async (session) => {
@@ -301,36 +300,37 @@ class DbConnection {
                 };
             })
         );
-    
+
         // Convert to plain text for Nebius AI
         const plainText = await this.formatChatForNebius(formattedSessions);
         console.log("Formatted Sessions (Plain Text):", plainText);
-    
+
         // Send plain text to Nebius AI
         const aiResponse = await this.getAIGraphResponse(plainText);
         console.log("AI Response:", aiResponse);
         return aiResponse;
     }
-    
+
     // Utility function to convert chat history to plain text
     async formatChatForNebius(sessions) {
         let formattedText = "";
-    
+
         sessions.forEach((session) => {
-            formattedText += `Session: ${session.session_name}\n`;
-    
+            formattedText += `Session ID: ${session.session_id}\n`;
+            formattedText += `Session name: ${session.session_name}\n`;
+
             session.messages.forEach((message) => {
                 formattedText += `Timestamp: ${message.timestamp}\n`;
                 formattedText += `${message.type}: ${message.content}\n`;
             });
-    
+
             formattedText += "\n"; // Separate sessions
         });
-    
+
         return formattedText.trim(); // Remove any trailing newlines
     }
-    
-    
+
+
 }
 
 module.exports = DbConnection;
