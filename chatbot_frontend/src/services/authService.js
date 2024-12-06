@@ -281,3 +281,17 @@ export const forgotPassword = async (email, newPassword) => {
         throw new Error(error.resposne?.data?.message || 'Failed to reset password!')
     }
 }
+
+export const getProgressMetrics = async (userId) => {
+    try {
+        const response = await api.post('/progressGraph', {
+            params: {
+                user_id: userId
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Get progress metrics error:', error);
+        throw new Error(error.response?.data?.message || 'Failed to get progress metrics');
+    }
+};

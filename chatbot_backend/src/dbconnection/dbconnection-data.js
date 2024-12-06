@@ -316,7 +316,8 @@ class DbConnection {
         let formattedText = "";
 
         sessions.forEach((session) => {
-            formattedText += `Session: ${session.session_name}\n`;
+            formattedText += `Session ID: ${session.session_id}\n`;
+            formattedText += `Session name: ${session.session_name}\n`;
 
             session.messages.forEach((message) => {
                 formattedText += `Timestamp: ${message.timestamp}\n`;

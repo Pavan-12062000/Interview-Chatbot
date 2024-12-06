@@ -65,20 +65,6 @@ const MainPage = () => {
         }
     }, [messages, loading]);
 
-    // Load messages for a specific chat
-    const loadChatMessages = async (sessionId) => {
-        try {
-            setLoading(true);
-            const response = await getChatMessages(sessionId);
-            setMessages(response);
-        } catch (err) {
-            console.error('Error loading messages:', err);
-            setError('Failed to load messages');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     // Handle sending messages
     const handleSend = async () => {
         if (message.trim()) {
@@ -220,30 +206,6 @@ const MainPage = () => {
             console.error('Error deleting chat:', err);
             setError('Failed to delete chat');
         }
-    };
-
-    // Handle voice input
-    const handleVoiceInput = () => {
-        if (!('webkitSpeechRecognition' in window)) {
-            setError('Speech recognition is not supported in this browser.');
-            return;
-        }
-
-        const recognition = new window.webkitSpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            setMessage(prev => prev + transcript);
-        };
-
-        recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
-            setError('Failed to recognize speech');
-        };
-
-        recognition.start();
     };
 
     // Handle Enter key press
@@ -455,9 +417,17 @@ const MainPage = () => {
                             <img className='logo' src={logoImg} alt='logoImg'></img>
                             <h1>IntervBot</h1>
                         </div>
-                        <button className="control-btn" onClick={handleLogout}>
-                            <LogOut size={20} />
-                        </button>
+                        <div className="header-actions">
+                            <button
+                                className="performance-btn"
+                                onClick={() => window.location.href = '/userperformance'}
+                            >
+                                Performance
+                            </button>
+                            <button className="control-btn" onClick={handleLogout}>
+                                <LogOut size={20} />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Error Alert */}
