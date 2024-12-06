@@ -1,46 +1,26 @@
 create table register (id serial primary key,
-
  					  firstname character varying not null,
-
  					  lastname character varying not null,
-
  					  email character varying not null,
-
  					  password character varying not null,
-
  					  timestamp timestamp without time zone,
-
  					  updated_timestamp timestamp without time zone,
-
  					  CONSTRAINT unique_user UNIQUE (firstname, lastname, email));
  
 CREATE TABLE chat_sessions (
-
      session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique identifier for each session
-
      user_id INT NOT NULL,                                 -- Foreign key to the user's table
-
      session_name VARCHAR(100),                            -- Optional name for the session
-
      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP        -- Timestamp for when the session started
-
-     updated_at timestamp without timezone DEFAULT now()   -- Timestamp for when the session is updated
+     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- Timestamp for when the session is updated
 
  );
  
- 
 CREATE TABLE chat_history (
-
      id SERIAL PRIMARY KEY,                                -- Unique identifier for each message
-
      chat_session_id UUID REFERENCES chat_sessions(session_id) ON DELETE CASCADE, 
-
                                                          -- Foreign key to link with the chat_sessions table
-
      sender VARCHAR(50) NOT NULL,                         -- Message sender ("user" or "bot")
-
      message TEXT NOT NULL,                               -- The content of the message
-
      timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP        -- Timestamp of the message
-
  );

@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// const API_BASE_URL = 'https://localhost:8080';       //Uncomment this line and comment the next line if you are using HTTPS
+// const API_BASE_URL = 'https://localhost:8080'; // Uncomment this line for HTTPS
 
-const API_BASE_URL = 'http://localhost:8080'; // Uncomment this line and comment the previous line if you are using HTTP
+const API_BASE_URL = 'http://localhost:8080';
 
 // Store user info
 const TOKEN_KEY = 'auth_token';
@@ -261,5 +261,39 @@ export const renameSession = async (sessionId, newName) => {
     } catch (error) {
         console.error('Rename session error:', error.response || error);
         throw new Error(error.response?.data?.message || 'Failed to rename session');
+    }
+};
+
+export const forgotPassword = async (email, newPassword) => {
+    try {
+        const response = await api.post('/forgotPassword', {
+            params: {
+                email: email,
+                password: newPassword
+            }
+        });
+
+        return {
+            success: true,
+            data: response.data
+        };
+
+    } catch (error) {
+        console.error('Reset password error:', error.response || error);
+        throw new Error(error.resposne?.data?.message || 'Failed to reset password!')
+    }
+}
+
+export const getProgressMetrics = async (userId) => {
+    try {
+        const response = await api.post('/progressGraph', {
+            params: {
+                user_id: userId
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Get progress metrics error:', error);
+        throw new Error(error.response?.data?.message || 'Failed to get progress metrics');
     }
 };
