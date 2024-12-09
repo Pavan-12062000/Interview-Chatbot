@@ -23,6 +23,8 @@ const MainPage = () => {
     const [latestChatSession, setLatestChatSession] = useState('');
     const [isLatestChat, setIsLatestChat] = useState(false);
     const messageAreaRef = useRef(null);
+    const [isVoiceMode, setIsVoiceMode] = useState(false);
+    const [isListening, setIsListening] = useState(false);
 
     // Load chat history on component mount
     useEffect(() => {
@@ -66,8 +68,9 @@ const MainPage = () => {
     }, [messages, loading]);
 
     // Handle sending messages
-    const handleSend = async () => {
-        if (message.trim()) {
+    const handleSend = async (voiceMessage = null) => {
+        const messageToSend = voiceMessage || message;
+        if (messageToSend.trim()) {
             try {
                 setLoading(true);
                 if (!chatStarted) {
@@ -89,12 +92,12 @@ const MainPage = () => {
                 const userMessage = {
                     id: Date.now(),
                     sender: 'user',
-                    message: message
+                    message: messageToSend
                 };
                 setMessages(prevMessages => [...prevMessages, userMessage]);
 
                 //console.log('activeChat:', activeChat)
-                const response = await sendMessage(activeChat, message);
+                const response = await sendMessage(activeChat, messageToSend);
                 //console.log('Server response:', response); 
 
                 setMessage('');
@@ -106,6 +109,13 @@ const MainPage = () => {
                         message: response
                     };
                     setMessages(prevMessages => [...prevMessages, aiMessage]);
+                }
+
+                //Voice message
+                if (response && isVoiceMode) {
+                    const utterance = new SpeechSynthesisUtterance(response);
+                    utterance.lang = 'en-US';
+                    window.speechSynthesis.speak(utterance);
                 }
 
             } catch (err) {
@@ -330,6 +340,42 @@ const MainPage = () => {
         </div>
     );
 
+    //Voice input and output
+    const handleVoiceInput = () => {
+        if (!('webkitSpeechRecognition' in window)) {
+            setError('Speech recognition is not supported in this browser.');
+            return;
+        }
+        const recognition = new window.webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+            setIsListening(true);
+        }
+
+        recognition.onend = () => {
+            setIsListening(false);
+        }
+
+        recognition.onresult = async (event) => {
+            const transcript = event.results[0][0].transcript;
+            setMessage(transcript);
+            if (transcript.trim()) {
+                await handleSend(transcript);
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            setError('Failed to recognize speech.');
+            setIsListening(false);
+        }
+
+        recognition.start();
+    }
+
     return (
         <div className="mainpage">
             <Row className="h-100 g-0">
@@ -490,18 +536,36 @@ const MainPage = () => {
                     {/* Input Area */}
                     <div className="input-area">
                         <div className="input-container">
+                            <div className="voice-controls">
+                                <button
+                                    className={`voice-mode-btn ${isVoiceMode ? 'active' : ''}`}
+                                    onClick={() => setIsVoiceMode(!isVoiceMode)}
+                                    title="Toggle voice mode"
+                                >
+                                    <Mic size={20} />
+                                </button>
+                                {isVoiceMode && (
+                                    <button
+                                        className={`voice-input-btn ${isListening ? 'listening' : ''}`}
+                                        onClick={handleVoiceInput}
+                                        disabled={!chatStarted || !isLatestChat}
+                                    >
+                                        {isListening ? 'Listening...' : 'Speak'}
+                                    </button>
+                                )}
+                            </div>
                             <input
                                 type="text"
-                                placeholder="Type your message..."
+                                placeholder={isVoiceMode ? "Voice mode enabled..." : "Type your message..."}
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                                disabled={!chatStarted || !isLatestChat}
+                                disabled={!chatStarted || !isLatestChat || isListening}
                             />
                             <button
                                 className="send-btn"
                                 onClick={handleSend}
-                                disabled={loading || !chatStarted || !isLatestChat}
+                                disabled={loading || !chatStarted || !isLatestChat || isListening}
                             >
                                 Send
                             </button>
