@@ -74,42 +74,131 @@ This chatbot serves:
   git clone "https://github.com/Pavan-12062000/Interview-Chatbot"
   ```
 
-### **2.Navigate to the backend service:**
-   ```bash
-   cd chatbot_backend
-   ```
+### **2.Install PostgreSQL database and Create a database in pgAdmin and the scripts are there in DB Scripts.txt file in the root directory of chatbot_backend folder.**
 
-### **3.Install PostgreSQL database and Create a database in pgAdmin and the scripts are there in DB Scripts.txt file in the root directory of chatbot_backend folder.**
+### **3.To run the services in a secure connection (HTTPS).**
 
-### 4.Create a .env file in the root directory and add the below in the .env file: 
+#### **3.1 Self Signed SSL Certificate.**
+
+##### **3.1.1 Step 1: Generate Self Signed SSL Certificate**
+Download openssl exe file and use openaal to create a self-signed ssl certificate.
+To generate a new private key:
+```bash
+openssl genrsa -out private-key.pem 2048 
+```
+
+Create a Certificate Signed Request (CSR):
+```bash
+openssl req -new -key private-key.pem -out certificate.csr -subj 
+"/C=CA/ST=ON/L=Ottawa/O=MyCompany/CN=localhost"  
+```
+
+Create a configuration file (.cnf) and add the below code:
+```bash
+[ v3_req ]
+subjectAltName = @alt_names    
+[ alt_names ]  
+DNS.1 = localhost  
+```
+
+Generate the Self-Signed Certificate with SAN
+```bash
+ openssl x509 -req -in certificate.csr -signkey private-key.pem -out certificate.pem -days 365 -extensions v3_req -extfile C:\path\to\openssl.cnf  
+```
+
+##### **3.1.2 Step 2:  Installing a self-signed SSL certificate into the Trusted Root Certification Authorities store on a Windows system**
+• Press Windows + R and type mmc and enter.  
+• Go to File > Add/Remove snap-in...  
+• Select certificates and click add.  
+• Choose computer account and click next and then click finish.  
+• In the left pane, expand Certificates (Local Computer) > Trusted Root 
+Certification Authorities > Certificates.  
+• Right click on certificates and select all tasks > Import.  
+• Follow the import wizard, select certificate.pem file, and choose to install it 
+in the Trusted Root Certification Authorities.  
+
+#### **3.2 Create a new folder "certificates" in the root directory and add the downloaded private-key.pem and certificate.pem files in it**
+
+#### **3.3 Navigate to the backend services**
+```vash
+cd chatbot_backend
+```
+
+#### **3.4 Create a .env file in the root directory and add the below in the .env file:**
 **NEBIUS_API_KEY = "your_api_key"**
+**PORT = 8080**
 
+#### **3.5 Install all the deoendencies:**
+```bash
+npm i
+```
 
-### **5.Install all the required dependencies:**
-   ```bash
-   npm i
-   ```
-
-### **6. Update the below fields in dbconenction.js file with your credentials:**
+#### **3.6 Update the below fields in dbconenction.js file with your credentials:**
 - database: 'your_database_name'
 - password: 'your_password'
 
-### **7. To run the backend service, run the below command:**
+#### **3.7 Uncomment the lines from 3 to 44 in the file app.js and comment the remaining code**
+
+#### **3.8 To run the backend service, run the below command:**
    ```bash
    node app
    ```
 
-### **8. Open a new terminal and navigate to the frontend service:**
+#### **3.9 Open a new terminal and navigate to the frontend service:**
+   ```bash
+   cd chatbot_frontend
+   ```
+
+#### **3.10 Install all the required dependencies:**
+   ```bash
+   npm i
+   ```
+
+#### **3.11 Uncomment the line 3 and comment line 5 inside authService.js**
+
+#### **3.12 Replace the line  “start”: “react-scripts start” with ”start": "cross-env HTTPS=true SSL_CRT_FILE=.././certificates/certificate.pem SSL_KEY_FILE=.././certificates/private-key.pem react-scripts start” inside package.json file**
+
+#### **3.13 To run the frontend service, run the below command:**
+   ```bash
+   npm start
+   ```
+
+### **4. To run the services in a secure connection (HTTPS):**
+
+#### **4.1 Navigate to the backend service:**
+   ```bash
+   cd chatbot_backend
+   ```
+
+#### 4.2 Create a .env file in the root directory and add the below in the .env file: 
+**NEBIUS_API_KEY = "your_api_key"**
+
+
+#### **4.3 Install all the required dependencies:**
+   ```bash
+   npm i
+   ```
+
+#### **4.4 Update the below fields in dbconenction.js file with your credentials:**
+- database: 'your_database_name'
+- password: 'your_password'
+
+#### **4.5 To run the backend service, run the below command:**
+   ```bash
+   node app
+   ```
+
+#### **4.6 Open a new terminal and navigate to the frontend service:**
    ```bash
    cd chatbot_frontend
   
    ```   
-### **9. Install all the required dependencies:**
+#### **4.7 Install all the required dependencies:**
    ```bash
    npm i
    ```   
 
-### **10. To run the frontend service, run the below command:**
+#### **4.8 To run the frontend service, run the below command:**
    ```bash
    npm start
    ```
