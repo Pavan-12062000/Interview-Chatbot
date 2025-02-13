@@ -18,12 +18,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Step 3: Compute cache key
+      # Step 3: Compute Static Cache Key
       - name: Compute Cache Key
-        id: compute-cache-key
-        run: echo "CACHE_KEY=${{ runner.os }}-docker-${{ github.sha }}" >> $GITHUB_ENV
+        run: echo "CACHE_KEY=docker-cache" >> $GITHUB_ENV
 
-      # Step 4: Restore Docker cache
+      # Step 4: Restore Docker Cache
       - name: Restore Docker Cache
         id: cache-docker-layers
         uses: actions/cache@v3
@@ -31,7 +30,7 @@ jobs:
           path: /tmp/.buildx-cache
           key: ${{ env.CACHE_KEY }}
           restore-keys: |
-            ${{ runner.os }}-docker-
+            docker-cache
 
       # Step 5: Print Cache Status
       - name: Print Cache Status
@@ -49,7 +48,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 7: Build and push frontend image with cache
+      # Step 7: Build and push frontend image with remote cache
       - name: Build and push frontend image
         uses: docker/build-push-action@v3
         with:
@@ -57,10 +56,10 @@ jobs:
           file: ./chatbot_frontend/Dockerfile
           push: true
           tags: ppavansree/frontend:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          cache-from: type=registry,ref=ppavansree/frontend:cache
+          cache-to: type=registry,ref=ppavansree/frontend:cache,mode=max
 
-      # Step 8: Build and push backend image with cache
+      # Step 8: Build and push backend image with remote cache
       - name: Build and push backend image
         uses: docker/build-push-action@v3
         with:
@@ -68,11 +67,13 @@ jobs:
           file: ./chatbot_backend/Dockerfile
           push: true
           tags: ppavansree/backend:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          cache-from: type=registry,ref=ppavansree/backend:cache
+          cache-to: type=registry,ref=ppavansree/backend:cache,mode=max
 
       # Step 9: Save cache after build
       - name: Save Docker Cache
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+          if [ -d "/tmp/.buildx-cache-new" ]; then
+            rm -rf /tmp/.buildx-cache
+            mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          fi
