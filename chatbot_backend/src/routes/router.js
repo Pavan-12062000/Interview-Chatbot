@@ -128,7 +128,7 @@ router.post('/rename', async (req, res) => {
     }
 })
 
-router.post('/forgotpassword', async (req, res) => {
+router.post('/forgotPassword', async (req, res) => {
     try{
         const response = await chatbotService.forgotPassword(req);
         res.send(response);
