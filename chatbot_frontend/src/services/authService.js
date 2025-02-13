@@ -266,7 +266,7 @@ export const renameSession = async (sessionId, newName) => {
 
 export const forgotPassword = async (email, newPassword) => {
     try {
-        const response = await api.post('/forgotPassword', {
+        const response = await api.post('/forgotpassword', {
             params: {
                 email: email,
                 password: newPassword
