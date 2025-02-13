@@ -56,8 +56,12 @@ jobs:
           file: ./chatbot_frontend/Dockerfile
           push: true
           tags: ppavansree/frontend:latest
-          cache-from: type=registry,ref=ppavansree/frontend:cache
-          cache-to: type=registry,ref=ppavansree/frontend:cache,mode=max
+          cache-from: |
+            type=local,src=/tmp/.buildx-cache
+            type=registry,ref=ppavansree/frontend:cache
+          cache-to: |
+            type=local,dest=/tmp/.buildx-cache-new
+            type=registry,ref=ppavansree/frontend:cache,mode=max
 
       # Step 8: Build and push backend image with remote cache
       - name: Build and push backend image
@@ -67,13 +71,24 @@ jobs:
           file: ./chatbot_backend/Dockerfile
           push: true
           tags: ppavansree/backend:latest
-          cache-from: type=registry,ref=ppavansree/backend:cache
-          cache-to: type=registry,ref=ppavansree/backend:cache,mode=max
+          cache-from: |
+            type=local,src=/tmp/.buildx-cache
+            type=registry,ref=ppavansree/backend:cache
+          cache-to: |
+            type=local,dest=/tmp/.buildx-cache-new
+            type=registry,ref=ppavansree/backend:cache,mode=max
 
-      # Step 9: Save cache after build
+      # Step 9: Debug Cache Directory
+      - name: Debug Cache Directory
+        run: ls -la /tmp
+
+      # Step 10: Save cache after build
       - name: Save Docker Cache
         run: |
           if [ -d "/tmp/.buildx-cache-new" ]; then
+            echo "✅ New cache found! Moving it to /tmp/.buildx-cache."
             rm -rf /tmp/.buildx-cache
             mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          else
+            echo "⚠️ No new cache found. Skipping cache save."
           fi
