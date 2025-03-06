@@ -47,16 +47,6 @@ This chatbot serves:
 - **Database**: PostgreSQL  
 
 ---
-
-## **Team Roles**  
-
-| **Team Member**       | **Role**                     | **Responsibilities**                                                |  
-|------------------------|------------------------------|----------------------------------------------------------------------|  
-| **Fangyuan Lin**       | Prompt Engineer             | Develops prompts to improve chatbot responses.                      |  
-| **Yuan Gao**           | Frontend Developer          | Designs and implements the user interface using React.js.           |  
-| **Pavan Sree Pichuka** | Backend Developer           | Develops chatbot logic and integrates external data using Node.js.  |  
-| **Ravi Prassand Kumar Siva Subramanea Pillai** | Project Manager & DB Developer | Oversees project execution and implements chat session history in PostgreSQL. |  
-
 ---
 
 ## **Goals**  
