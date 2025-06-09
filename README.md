@@ -4,11 +4,8 @@
 1. [Overview](#overview)  
 2. [Features](#features)  
 3. [Technologies Used](#technologies-used)  
-4. [Team Roles](#team-roles)  
-5. [Goals](#goals)  
-6. [Usage Instructions](#usage-instructions)  
-7. [Contributing](#contributing)  
-8. [Contact](#contact)  
+4. [Goals](#goals)
+5. [Usage Instructions](#usage-instructions)
 
 ---
 
@@ -153,7 +150,7 @@ npm i
    npm start
    ```
 
-### **4. To run the services in a secure connection (HTTPS):**
+### **4. How to run on HTTPS:**
 
 #### **4.1 Navigate to the backend service:**
    ```bash
